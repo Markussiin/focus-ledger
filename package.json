@@ -4,8 +4,9 @@
   "description": "A local-first focus session dashboard with analytics, distraction tracking, and import/export.",
   "type": "module",
   "scripts": {
+    "build": "node scripts/build-browser.js",
     "test": "node --test --test-isolation=none",
-    "check": "node --check src/core.js && node --check src/storage.js && node --check src/app.js"
+    "check": "node --check src/core.js && node --check src/storage.js && node --check src/app.js && node --check src/focus-ledger.bundle.js"
   },
   "keywords": [
     "focus",
@@ -20,4 +21,3 @@
     "node": ">=18"
   }
 }
-

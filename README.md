@@ -18,11 +18,12 @@ I built this project for fun as a more complete productivity tool: useful enough
 
 ## Quick Start
 
-Open `index.html` in a browser.
+Open `index.html` in a browser. The page uses a generated classic browser bundle, so it works when opened directly from the filesystem.
 
 For checks:
 
 ```bash
+npm run build
 npm test
 npm run check
 ```
@@ -37,6 +38,8 @@ src/styles.css      Responsive interface styling
 src/app.js          Browser UI, timer, charts, forms, rendering
 src/core.js         State normalization, session/project creation, analytics
 src/storage.js      Local storage and import/export helpers
+src/focus-ledger.bundle.js Browser bundle for direct index.html usage
+scripts/build-browser.js Bundle generator
 test/core.test.js   Analytics and model tests
 ```
 
@@ -75,4 +78,3 @@ This makes the important logic testable without a browser while keeping the app 
 ## License
 
 MIT
-
