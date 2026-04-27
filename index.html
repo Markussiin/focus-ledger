@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Focus Ledger</title>
+    <link rel="stylesheet" href="src/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar" aria-label="Workspace">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">FL</div>
+          <div>
+            <h1>Focus Ledger</h1>
+            <p id="todayLabel"></p>
+          </div>
+        </div>
+
+        <nav class="nav-tabs" aria-label="Views">
+          <button class="tab is-active" type="button" data-view="dashboard">Dashboard</button>
+          <button class="tab" type="button" data-view="sessions">Sessions</button>
+          <button class="tab" type="button" data-view="projects">Projects</button>
+          <button class="tab" type="button" data-view="settings">Settings</button>
+        </nav>
+
+        <section class="timer-panel" aria-label="Focus timer">
+          <div class="timer-clock" id="timerClock">25:00</div>
+          <label>
+            Project
+            <select id="timerProject"></select>
+          </label>
+          <label>
+            Intention
+            <input id="timerNote" type="text" maxlength="80" placeholder="Deep work">
+          </label>
+          <div class="timer-actions">
+            <button class="primary" type="button" id="timerStart">Start</button>
+            <button type="button" id="timerPause">Pause</button>
+            <button type="button" id="timerSave">Save</button>
+          </div>
+        </section>
+      </aside>
+
+      <section class="content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Local-first productivity</p>
+            <h2 id="viewTitle">Dashboard</h2>
+          </div>
+          <div class="topbar-actions">
+            <button type="button" id="seedData">Sample Data</button>
+            <button type="button" id="exportData">Export</button>
+            <label class="file-button">
+              Import
+              <input id="importData" type="file" accept="application/json">
+            </label>
+          </div>
+        </header>
+
+        <section class="view is-active" id="dashboardView">
+          <div class="metric-grid" id="metricGrid"></div>
+          <div class="dashboard-grid">
+            <section class="panel chart-panel">
+              <div class="panel-header">
+                <h3>Weekly Focus</h3>
+                <select id="rangeSelect">
+                  <option value="7">7 days</option>
+                  <option value="14">14 days</option>
+                  <option value="30">30 days</option>
+                </select>
+              </div>
+              <canvas id="focusChart" width="860" height="320"></canvas>
+            </section>
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Project Mix</h3>
+              </div>
+              <canvas id="projectChart" width="420" height="320"></canvas>
+            </section>
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Recent Sessions</h3>
+              </div>
+              <div class="activity-list" id="recentSessions"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Distractions</h3>
+              </div>
+              <div class="activity-list" id="distractionList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="sessionsView">
+          <div class="split-grid">
+            <form class="panel form-panel" id="sessionForm">
+              <div class="panel-header">
+                <h3>Add Session</h3>
+              </div>
+              <label>
+                Date
+                <input name="date" type="date" required>
+              </label>
+              <label>
+                Project
+                <select name="projectId" required></select>
+              </label>
+              <div class="two-col">
+                <label>
+                  Minutes
+                  <input name="minutes" type="number" min="1" max="600" value="50" required>
+                </label>
+                <label>
+                  Energy
+                  <select name="energy">
+                    <option value="high">High</option>
+                    <option value="steady" selected>Steady</option>
+                    <option value="low">Low</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                Notes
+                <textarea name="note" rows="4" maxlength="280" placeholder="What moved forward?"></textarea>
+              </label>
+              <label>
+                Distractions
+                <input name="distractions" type="text" placeholder="Slack, phone, meetings">
+              </label>
+              <button class="primary" type="submit">Add Session</button>
+            </form>
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Session Ledger</h3>
+                <select id="projectFilter"></select>
+              </div>
+              <div class="session-table" id="sessionTable"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="projectsView">
+          <div class="split-grid">
+            <form class="panel form-panel" id="projectForm">
+              <div class="panel-header">
+                <h3>Add Project</h3>
+              </div>
+              <label>
+                Name
+                <input name="name" type="text" maxlength="40" required>
+              </label>
+              <label>
+                Color
+                <input name="color" type="color" value="#2563eb">
+              </label>
+              <label>
+                Weekly target
+                <input name="weeklyTarget" type="number" min="30" max="3000" step="15" value="300">
+              </label>
+              <button class="primary" type="submit">Add Project</button>
+            </form>
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Project Targets</h3>
+              </div>
+              <div class="project-list" id="projectList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="settingsView">
+          <div class="split-grid">
+            <section class="panel form-panel">
+              <div class="panel-header">
+                <h3>Preferences</h3>
+              </div>
+              <label>
+                Focus length
+                <input id="focusLength" type="number" min="5" max="180" value="25">
+              </label>
+              <label>
+                Daily goal
+                <input id="dailyGoal" type="number" min="15" max="600" value="120">
+              </label>
+              <button class="primary" type="button" id="saveSettings">Save Settings</button>
+            </section>
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Data</h3>
+              </div>
+              <div class="danger-zone">
+                <p>Stored locally in this browser.</p>
+                <button type="button" id="clearData">Clear Data</button>
+              </div>
+            </section>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <template id="emptyTemplate">
+      <div class="empty-state">No records yet.</div>
+    </template>
+
+    <script type="module" src="src/app.js"></script>
+  </body>
+</html>
+

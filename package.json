@@ -1,0 +1,23 @@
+{
+  "name": "focus-ledger",
+  "version": "0.1.0",
+  "description": "A local-first focus session dashboard with analytics, distraction tracking, and import/export.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-isolation=none",
+    "check": "node --check src/core.js && node --check src/storage.js && node --check src/app.js"
+  },
+  "keywords": [
+    "focus",
+    "productivity",
+    "local-first",
+    "dashboard",
+    "analytics"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}
+
