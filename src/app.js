@@ -267,7 +267,7 @@ function renderSessions() {
                 <td>${formatMinutes(session.minutes)}</td>
                 <td>${escapeHtml(session.energy)}</td>
                 <td>${escapeHtml(session.note || session.distractions.join(", ") || "—")}</td>
-                <td><button type="button" data-remove-session="${session.id}">Delete</button></td>
+                <td><button type="button" data-remove-session="${escapeAttr(session.id)}">Delete</button></td>
               </tr>
             `;
           })
@@ -304,7 +304,7 @@ function renderProjects() {
 }
 
 function renderProjectOptions() {
-  const options = state.projects.map((project) => `<option value="${project.id}">${escapeHtml(project.name)}</option>`).join("");
+  const options = state.projects.map((project) => `<option value="${escapeAttr(project.id)}">${escapeHtml(project.name)}</option>`).join("");
   const filterOptions = `<option value="all">All projects</option>${options}`;
 
   els.sessionProject.innerHTML = options;
@@ -503,4 +503,8 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll("\"", "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value);
 }

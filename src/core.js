@@ -13,8 +13,9 @@ export const DEFAULT_STATE = Object.freeze({
 
 export function createSession(input, now = new Date()) {
   const minutes = Number(input.minutes);
+  const projectId = normalizeId(input.projectId);
 
-  if (!input.projectId) {
+  if (!projectId) {
     throw new Error("Project is required");
   }
 
@@ -23,9 +24,9 @@ export function createSession(input, now = new Date()) {
   }
 
   return {
-    id: input.id ?? cryptoSafeId("session", now),
-    projectId: input.projectId,
-    date: input.date ?? toDateKey(now),
+    id: normalizeId(input.id) || cryptoSafeId("session", now),
+    projectId,
+    date: normalizeDateKey(input.date, now),
     minutes: Math.round(minutes),
     energy: input.energy ?? "steady",
     note: cleanText(input.note),
@@ -47,9 +48,9 @@ export function createProject(input, now = new Date()) {
   }
 
   return {
-    id: input.id ?? slugify(`${name}-${now.getTime()}`),
+    id: normalizeId(input.id) || slugify(`${name}-${now.getTime()}`),
     name,
-    color: input.color || "#2563eb",
+    color: normalizeColor(input.color, "#2563eb"),
     weeklyTarget: Math.round(weeklyTarget)
   };
 }
@@ -225,6 +226,7 @@ function normalizeProject(project) {
 
 function normalizeSession(session) {
   try {
+    const createdAt = validDate(session.createdAt) ? session.createdAt : new Date(0).toISOString();
     return createSession(
       {
         id: session.id,
@@ -234,9 +236,9 @@ function normalizeSession(session) {
         energy: session.energy,
         note: session.note,
         distractions: session.distractions,
-        createdAt: session.createdAt
+        createdAt
       },
-      new Date(session.createdAt ?? Date.now())
+      new Date(createdAt)
     );
   } catch {
     return null;
@@ -265,6 +267,28 @@ function slugify(value) {
     .replace(/^-|-$/g, "");
 }
 
+function normalizeId(value) {
+  return String(value ?? "")
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function normalizeColor(value, fallback) {
+  const color = String(value ?? "").trim();
+  return /^#[0-9a-fA-F]{6}$/.test(color) ? color : fallback;
+}
+
+function normalizeDateKey(value, fallback) {
+  const date = String(value ?? "").trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : toDateKey(fallback);
+}
+
+function validDate(value) {
+  return !Number.isNaN(new Date(value).getTime());
+}
+
 function cryptoSafeId(prefix, date) {
   const random = globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2);
   return `${prefix}-${date.getTime()}-${random}`.replace(/[^a-zA-Z0-9-]/g, "");
@@ -277,4 +301,3 @@ function sum(values) {
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
-

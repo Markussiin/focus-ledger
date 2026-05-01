@@ -16,8 +16,9 @@
   
   function createSession(input, now = new Date()) {
     const minutes = Number(input.minutes);
+    const projectId = normalizeId(input.projectId);
   
-    if (!input.projectId) {
+    if (!projectId) {
       throw new Error("Project is required");
     }
   
@@ -26,9 +27,9 @@
     }
   
     return {
-      id: input.id ?? cryptoSafeId("session", now),
-      projectId: input.projectId,
-      date: input.date ?? toDateKey(now),
+      id: normalizeId(input.id) || cryptoSafeId("session", now),
+      projectId,
+      date: normalizeDateKey(input.date, now),
       minutes: Math.round(minutes),
       energy: input.energy ?? "steady",
       note: cleanText(input.note),
@@ -50,9 +51,9 @@
     }
   
     return {
-      id: input.id ?? slugify(`${name}-${now.getTime()}`),
+      id: normalizeId(input.id) || slugify(`${name}-${now.getTime()}`),
       name,
-      color: input.color || "#2563eb",
+      color: normalizeColor(input.color, "#2563eb"),
       weeklyTarget: Math.round(weeklyTarget)
     };
   }
@@ -228,6 +229,7 @@
   
   function normalizeSession(session) {
     try {
+      const createdAt = validDate(session.createdAt) ? session.createdAt : new Date(0).toISOString();
       return createSession(
         {
           id: session.id,
@@ -237,9 +239,9 @@
           energy: session.energy,
           note: session.note,
           distractions: session.distractions,
-          createdAt: session.createdAt
+          createdAt
         },
-        new Date(session.createdAt ?? Date.now())
+        new Date(createdAt)
       );
     } catch {
       return null;
@@ -266,6 +268,28 @@
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
+  }
+  
+  function normalizeId(value) {
+    return String(value ?? "")
+      .trim()
+      .replace(/[^a-zA-Z0-9_-]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+  
+  function normalizeColor(value, fallback) {
+    const color = String(value ?? "").trim();
+    return /^#[0-9a-fA-F]{6}$/.test(color) ? color : fallback;
+  }
+  
+  function normalizeDateKey(value, fallback) {
+    const date = String(value ?? "").trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : toDateKey(fallback);
+  }
+  
+  function validDate(value) {
+    return !Number.isNaN(new Date(value).getTime());
   }
   
   function cryptoSafeId(prefix, date) {
@@ -572,7 +596,7 @@
                   <td>${formatMinutes(session.minutes)}</td>
                   <td>${escapeHtml(session.energy)}</td>
                   <td>${escapeHtml(session.note || session.distractions.join(", ") || "—")}</td>
-                  <td><button type="button" data-remove-session="${session.id}">Delete</button></td>
+                  <td><button type="button" data-remove-session="${escapeAttr(session.id)}">Delete</button></td>
                 </tr>
               `;
             })
@@ -609,7 +633,7 @@
   }
   
   function renderProjectOptions() {
-    const options = state.projects.map((project) => `<option value="${project.id}">${escapeHtml(project.name)}</option>`).join("");
+    const options = state.projects.map((project) => `<option value="${escapeAttr(project.id)}">${escapeHtml(project.name)}</option>`).join("");
     const filterOptions = `<option value="all">All projects</option>${options}`;
   
     els.sessionProject.innerHTML = options;
@@ -808,5 +832,9 @@
       .replaceAll(">", "&gt;")
       .replaceAll("\"", "&quot;")
       .replaceAll("'", "&#039;");
+  }
+  
+  function escapeAttr(value) {
+    return escapeHtml(value);
   }
 })();

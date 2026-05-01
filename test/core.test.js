@@ -41,6 +41,34 @@ test("creates projects with stable fields", () => {
   assert.equal(project.weeklyTarget, 300);
 });
 
+test("normalizes imported ids, dates, and colors", () => {
+  const state = normalizeState({
+    projects: [
+      {
+        id: "bad\"><img src=x>",
+        name: "Client Work",
+        color: "red; background:url(javascript:alert(1))",
+        weeklyTarget: 300
+      }
+    ],
+    sessions: [
+      {
+        id: "session\"><img src=x>",
+        projectId: "bad\"><img src=x>",
+        date: "<script>",
+        minutes: 25,
+        createdAt: "2026-04-27T10:00:00Z"
+      }
+    ]
+  });
+
+  assert.equal(state.projects[0].id, "bad-img-src-x");
+  assert.equal(state.projects[0].color, "#2563eb");
+  assert.equal(state.sessions[0].id, "session-img-src-x");
+  assert.equal(state.sessions[0].projectId, "bad-img-src-x");
+  assert.equal(state.sessions[0].date, "2026-04-27");
+});
+
 test("builds analytics for a date range", () => {
   const state = normalizeState({
     settings: { dailyGoal: 100 },
@@ -79,4 +107,3 @@ test("formats minutes and date keys", () => {
   assert.equal(formatMinutes(135), "2h 15m");
   assert.equal(toDateKey(new Date("2026-04-27T12:00:00")), "2026-04-27");
 });
-
